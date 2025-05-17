@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget Finance App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="logo.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Inter", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f5f3;
+      color: #222;
+      padding: 1rem;
+      height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: #1e1e2f;
+      color: #e0e0e0;
+    }
+
+    .logo {
+      display: block;
+      width: 68px;
+      margin-bottom: 0.5rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 2fr 2fr;
+      gap: 1rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .card,
+    .summary {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark .card,
+    body.dark .summary {
+      background: #2c2c3e;
+      color: #e0e0e0;
+    }
+
+    .card {
+      border-left: 4px solid #aca7c5;
+    }
+
+    .summary {
+      background: #dfdce5;
+      margin-bottom: 1rem;
+    }
+
+    body.dark .summary {
+      background: #3a3a4e;
+    }
+
+    .card h3,
+    .summary h2 {
+      margin-top: 0;
+    }
+
+    .input-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+    }
+
+    .input-row input,
+    .dropdown input,
+    .dropdown select {
+      padding: 0.4rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #f8f8f8;
+      max-width: 6rem;
+    }
+
+    body.dark .input-row input,
+    body.dark .dropdown input,
+    body.dark .dropdown select {
+      background: #444;
+      color: #fff;
+      border: 1px solid #666;
+    }
+
+    .highlight {
+      font-weight: 600;
+      color: #3f2d6a;
+    }
+
+    body.dark .highlight {
+      color: #a6b5ff;
+    }
+
+    input,
+    select {
+      border-radius: 8px;
+      background-color: #ffffff;
+    }
+
+    #analytics {
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 10px;
+      background: #e9e6f2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 62vw;
+      min-height: 30vh;
+      margin-left: auto;
+      margin-right: auto;
+      height: auto;
+    }
+
+    body.dark #analytics {
+      background: #3d3d5c;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    button {
+      background-color: #585279;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background-color: #3d3552;
+    }
+
+    #darkToggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+    }
+
+    @media (max-width: 768px) {
+      #analytics {
+        max-width: 90.6vw;
+        max-height: 30vh;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .dark-b {
+        font-size: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="dark-b" id="darkToggle">ON/OFF Dark Mode</button>
+  <h2 style="
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      ">
+    <img class="logo" src="./logo.png" alt="Logo" />
+    Budget Finance Calculator
+  </h2>
+  <h5 style="text-align: center; color: #666">By Vishwash C V / Cospeld</h5>
+  <div class="layout">
+    <div>
+      <div class="cards">
+        <div class="card">
+          <h3>Time-based Spending</h3>
+          <div class="input-row">
+            <span>6AM-12PM</span>
+            <input type="number" id="morning" value="0" />
+          </div>
+          <div class="input-row">
+            <span>12PM-4PM</span><input type="number" id="afternoon" value="0" />
+          </div>
+          <div class="input-row">
+            <span>4PM-7PM</span><input type="number" id="evening" value="0" />
+          </div>
+          <div class="input-row">
+            <span>7PM-6AM</span><input type="number" id="night" value="0" />
+          </div>
+        </div>
+        <div class="card">
+          <h3>Investment</h3>
+          <div class="input-row">
+            <span>Amount</span><input type="number" id="investment" value="0" />
+          </div>
+        </div>
+        <div class="card">
+          <h3>Desire Spending</h3>
+          <div class="input-row">
+            <span>Amount</span><input type="number" id="desire" value="0" />
+          </div>
+        </div>
+        <div class="card">
+          <h3>Revenue / Salary</h3>
+          <div class="dropdown">
+            <select id="period">
+              <option value="daily">Daily</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+            <input type="number" id="revenue" placeholder="Enter Amount" value="0" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="summary">
+        <h2>Results</h2>
+        <p>
+          Total Spending: <span class="highlight" id="totalSpend">0</span>
+        </p>
+        <p>
+          Total Deductions (All):
+          <span class="highlight" id="totalDeductions">0</span>
+        </p>
+        <p>
+          Remaining Balance: <span class="highlight" id="remaining">0</span>
+        </p>
+        <p>
+          Investment Saved:
+          <span class="highlight" id="investPercent">0%</span>
+        </p>
+        <p>
+          Desire Saved: <span class="highlight" id="desirePercent">0%</span>
+        </p>
+        <button onclick="downloadPDF()">Download PDF</button>
+        <button onclick="downloadAnalyticsScreenshot()">Download Analytics Image</button>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="analytics">
+    <canvas id="barChart" height="100"></canvas>
+  </div>
+
+
+  <script>
+    const inputs = [
+      "morning",
+      "afternoon",
+      "evening",
+      "night",
+      "investment",
+      "desire",
+      "revenue",
+      "period",
+    ];
+    inputs.forEach((id) =>
+      document.getElementById(id).addEventListener("input", calculate)
+    );
+
+    const barChart = new Chart(document.getElementById("barChart"), {
+      type: "bar",
+      data: {
+        labels: [
+          "6AM-12PM",
+          "12PM-4PM",
+          "4PM-7PM",
+          "7PM-6AM",
+          "Investment",
+          "Desire",
+        ],
+        datasets: [
+          {
+            label: "Spending Breakdown",
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: [
+              "#a084ca",
+              "#b69ac9",
+              "#cbb3d8",
+              "#d1a3e0",
+              "#e0bbf3",
+              "#ac8cf0",
+            ],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+
+    function calculate() {
+      const morning = +document.getElementById("morning").value;
+      const afternoon = +document.getElementById("afternoon").value;
+      const evening = +document.getElementById("evening").value;
+      const night = +document.getElementById("night").value;
+      const investment = +document.getElementById("investment").value;
+      const desire = +document.getElementById("desire").value;
+      const revenueRaw = +document.getElementById("revenue").value;
+      const period = document.getElementById("period").value;
+
+      let revenue = revenueRaw;
+      if (period === "monthly") revenue = revenueRaw / 30;
+      else if (period === "yearly") revenue = revenueRaw / 365;
+
+      const totalSpend = morning + afternoon + evening + night;
+      const totalDeductions = totalSpend + investment + desire;
+      const remaining = revenue - totalDeductions;
+
+      const investPercent =
+        revenue > 0 ? Math.round((investment / revenue) * 100) : 0;
+      const desirePercent =
+        revenue > 0 ? Math.round((desire / revenue) * 100) : 0;
+
+      document.getElementById("totalSpend").innerText = totalSpend;
+      document.getElementById("totalDeductions").innerText = totalDeductions;
+      document.getElementById("remaining").innerText = remaining;
+      document.getElementById("investPercent").innerText =
+        investPercent + "%";
+      document.getElementById("desirePercent").innerText =
+        desirePercent + "%";
+
+      barChart.data.datasets[0].data = [
+        morning,
+        afternoon,
+        evening,
+        night,
+        investment,
+        desire,
+      ];
+      barChart.update();
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Budget Finance Summary", 20, 20);
+      doc.setFontSize(12);
+      doc.text(
+        "Total Spending: " + document.getElementById("totalSpend").innerText,
+        20,
+        40
+      );
+      doc.text(
+        "Total Deductions: " +
+        document.getElementById("totalDeductions").innerText,
+        20,
+        50
+      );
+      doc.text(
+        "Remaining Balance: " +
+        document.getElementById("remaining").innerText,
+        20,
+        60
+      );
+      doc.text(
+        "Investment Saved: " +
+        document.getElementById("investPercent").innerText,
+        20,
+        70
+      );
+      doc.text(
+        "Desire Saved: " + document.getElementById("desirePercent").innerText,
+        20,
+        80
+      );
+      doc.save("finance_summary.pdf");
+    }
+
+    document.getElementById("darkToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
+
+    calculate();
+
+
+
+    // Load html2canvas
+    const html2canvasScript = document.createElement("script");
+    html2canvasScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    document.head.appendChild(html2canvasScript);
+
+    // Function to download analytics chart as image
+    function downloadAnalyticsScreenshot() {
+      const chartElement = document.getElementById("analytics");
+      html2canvas(chartElement).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "analytics_chart.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+
+
+
+
+
+
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Footer trigger button -->
+  <div style="
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-size: 12px;
+        z-index: 100;
+      ">
+    <button onclick="document.getElementById('popupModal').style.display='block'">
+      Terms & Privacy
+    </button>
+  </div>
+
+  <!-- Modal Popup -->
+  <div id="popupModal" style="
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.6);
+      ">
+    <div style="
+          background-color: #fff;
+          margin: 10% auto;
+          padding: 20px;
+          border-radius: 10px;
+          width: 90%;
+          max-width: 600px;
+        ">
+      <span style="float: right; cursor: pointer; font-size: 18px"
+        onclick="document.getElementById('popupModal').style.display='none'">&times;</span>
+      <h3>Terms & Conditions</h3>
+      <p>
+        This is a client-side only finance calculator. We do not store or
+        collect any user data. This application operates without a backend or
+        database also by visting our web or product you are accepting our terms and conditions.
+      </p>
+      <h3>Privacy Policy</h3>
+      <p>
+        No personal or financial data is collected, stored, or transmitted.
+        All calculations are done within your browser.
+      </p>
+      <p style="text-align: right; font-style: italic">
+        Created by Vishwash C V / Cospeld
+      </p>
+    </div>
+  </div>
+</body>
+
+</html>
