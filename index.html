@@ -3,9 +3,9 @@
 
 <head>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5394972206672113"
-     crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 
-  <meta name="google-adsense-account" content="ca-pub-5394972206672113">
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Budget Finance App</title>
@@ -437,6 +437,21 @@
 
 
 
+    function acceptTerms() {
+      document.getElementById('termsGate').style.display = 'none';
+    }
+
+    function declineTerms() {
+      alert("You must accept the terms to use this application.");
+      window.location.href = "https://www.google.com"; // or close tab
+    }
+
+    window.onload = () => {
+      document.getElementById('termsGate').style.display = 'flex';
+    };
+
+
+
 
   </script>
 
@@ -456,7 +471,42 @@
 
 
 
-  <!-- Footer trigger button -->
+ 
+
+  <div id="termsGate" style="
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  ">
+    <div style="
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+  ">
+      <h2>Accept Terms & Conditions</h2>
+      <p>By continuing, you agree to our <a href="#"
+          onclick="document.getElementById('popupModal').style.display='block'">Terms & Conditions</a> and Privacy
+        Policy.</p>
+      <button onclick="acceptTerms()">Continue</button>
+      <button onclick="declineTerms()" style="margin-left: 10px; background: gray;">Decline</button>
+    </div>
+
+
+  </div>
+
+
+
+   <!-- Footer trigger button -->
   <div style="
         position: fixed;
         bottom: 10px;
@@ -507,6 +557,12 @@
       </p>
     </div>
   </div>
+
+
+
+
+
+
 </body>
 
 </html>
